@@ -4,7 +4,7 @@ export default function AuthLayout({ children }: { children: React.ReactNode }) 
   return (
     <main className="grid min-h-dvh lg:grid-cols-2">
       {/* Brand panel */}
-      <section className="relative hidden overflow-hidden border-r border-line lg:flex lg:flex-col lg:justify-between p-12">
+      <section className="relative hidden overflow-hidden border-r border-line lg:flex lg:flex-col lg:justify-between p-12 pb-24">
         <div className="absolute inset-0 bg-[radial-gradient(40rem_30rem_at_20%_110%,rgb(255_122_0/0.35),transparent_70%)]" />
         <div className="absolute -right-24 top-1/3 h-96 w-96 rounded-full bg-brand/20 blur-[120px]" />
         <div className="relative"><Logo /></div>
@@ -19,11 +19,6 @@ export default function AuthLayout({ children }: { children: React.ReactNode }) 
             Pick your meal before the cut-off. We gather everyone&apos;s order and send it straight to the restaurant on WhatsApp and SMS.
           </p>
         </div>
-        <div className="relative flex gap-8 text-sm text-muted">
-          <Stat value="1 meal" label="per person, per day" />
-          <Stat value="0 calls" label="to the restaurant" />
-          <Stat value="On time" label="every day" />
-        </div>
       </section>
 
       {/* Form panel */}
@@ -32,14 +27,5 @@ export default function AuthLayout({ children }: { children: React.ReactNode }) 
         <div className="w-full max-w-sm animate-rise">{children}</div>
       </section>
     </main>
-  );
-}
-
-function Stat({ value, label }: { value: string; label: string }) {
-  return (
-    <div>
-      <div className="text-xl font-semibold text-fg">{value}</div>
-      <div>{label}</div>
-    </div>
   );
 }
