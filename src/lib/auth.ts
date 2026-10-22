@@ -3,18 +3,9 @@ import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { cache } from "react";
 import { db } from "./db";
-import {
-  GUEST_COOKIE,
-  SESSION_COOKIE,
-  guestCookieOptions,
-  sessionCookieOptions,
-  signGuest,
-  signSession,
-  verifyGuest,
-  verifySession,
-} from "./session";
+import { SESSION_COOKIE, sessionCookieOptions, signSession, verifySession } from "./session";
 
-/** The signed-in user, re-checked against the database. Null if signed out or deactivated. */
+/** The signed-in person, re-checked against the database. Null if signed out or deactivated. */
 export const getCurrentUser = cache(async () => {
   const store = await cookies();
   const session = await verifySession(store.get(SESSION_COOKIE)?.value);
@@ -24,37 +15,17 @@ export const getCurrentUser = cache(async () => {
   return user;
 });
 
-/** Signed-in admin, or null. */
-export const getAdmin = cache(async () => {
+/** Signed-in person, or send them to sign in (clearing a stale session first). */
+export async function requireUser() {
   const user = await getCurrentUser();
-  return user?.role === "ADMIN" ? user : null;
-});
+  if (!user) redirect("/api/auth/signout");
+  return user;
+}
 
 export async function requireAdmin() {
-  const user = await getCurrentUser();
-  if (!user) redirect("/login");
+  const user = await requireUser();
   if (user.role !== "ADMIN") redirect("/");
   return user;
-}
-
-/** The employee remembered on this device (set after their first order), or null. */
-export const getGuest = cache(async () => {
-  const store = await cookies();
-  const id = await verifyGuest(store.get(GUEST_COOKIE)?.value);
-  if (!id) return null;
-  const user = await db.user.findUnique({ where: { id } });
-  if (!user || !user.active) return null;
-  return user;
-});
-
-export async function rememberGuest(userId: string) {
-  const store = await cookies();
-  store.set(GUEST_COOKIE, await signGuest(userId), guestCookieOptions);
-}
-
-export async function forgetGuest() {
-  const store = await cookies();
-  store.delete(GUEST_COOKIE);
 }
 
 export async function startSession(user: { id: string; name: string; role: string }) {

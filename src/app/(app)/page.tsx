@@ -2,10 +2,10 @@ import Link from "next/link";
 import { Countdown } from "@/components/Countdown";
 import { Icon } from "@/components/Icon";
 import { OrderBoard } from "@/components/OrderBoard";
-import { getAdmin, getGuest } from "@/lib/auth";
+import { requireUser } from "@/lib/auth";
 import { db, getSettings } from "@/lib/db";
 import { describeCutoff, getActiveRound } from "@/lib/rounds";
-import { formatDate, formatTime, money, servedOn, weekdayOf, WEEKDAYS } from "@/lib/format";
+import { displayName, formatDate, formatTime, money, servedOn, weekdayOf, WEEKDAYS } from "@/lib/format";
 
 export const dynamic = "force-dynamic";
 
@@ -17,26 +17,25 @@ function greeting() {
 }
 
 export default async function OrderPage() {
-  const [guest, admin, round, settings] = await Promise.all([getGuest(), getAdmin(), getActiveRound(), getSettings()]);
-  const hello = guest ? `${greeting()}, ${guest.name.split(" ")[0]}` : greeting();
+  const [user, round, settings] = await Promise.all([requireUser(), getActiveRound(), getSettings()]);
+  const admin = user.role === "ADMIN";
+  const hello = `${greeting()}, ${user.name.split(" ")[0]}`;
 
   if (!round) {
     return (
       <EmptyState
         title="No lunch round yet"
         body="When an admin opens ordering, today's menu will appear here."
-        admin={!!admin}
+        admin={admin}
         greeting={`${hello}.`}
       />
     );
   }
 
-  const myOrder = guest
-    ? await db.order.findUnique({
-        where: { userId_roundId: { userId: guest.id, roundId: round.id } },
-        include: { items: true },
-      })
-    : null;
+  const myOrder = await db.order.findUnique({
+    where: { userId_roundId: { userId: user.id, roundId: round.id } },
+    include: { items: true },
+  });
 
   if (round.status !== "OPEN") {
     return (
@@ -71,7 +70,7 @@ export default async function OrderPage() {
               )}
             </>
           ) : (
-            <p className="text-muted">{guest ? "You didn't place an order for this round." : "No order from this device for this round."}</p>
+            <p className="text-muted">You didn&apos;t place an order for this round.</p>
           )}
         </div>
         <p className="mt-6 text-center text-sm text-subtle">The next menu will appear here when ordering opens again.</p>
@@ -80,13 +79,20 @@ export default async function OrderPage() {
   }
 
   // Orders this device placed on behalf of colleagues.
-  const forOthers = guest
-    ? await db.order.findMany({
-        where: { roundId: round.id, placedById: guest.id },
-        include: { user: true, items: true },
-        orderBy: { createdAt: "asc" },
-      })
-    : [];
+  const [forOthers, colleagues, roundOrders] = await Promise.all([
+    db.order.findMany({
+      where: { roundId: round.id, placedById: user.id },
+      include: { user: true, items: true },
+      orderBy: { createdAt: "asc" },
+    }),
+    // Staff list for "For someone else"
+    db.user.findMany({
+      where: { active: true, kind: "STAFF", id: { not: user.id }, phone: { not: null } },
+      select: { id: true, name: true, department: true },
+      orderBy: { name: "asc" },
+    }),
+    db.order.findMany({ where: { roundId: round.id }, select: { userId: true } }),
+  ]);
 
   // Only dishes served on this round's weekday.
   const day = weekdayOf(round.date);
@@ -139,14 +145,15 @@ export default async function OrderPage() {
       <OrderBoard
         forOthers={forOthers.map((o) => ({
           id: o.id,
-          name: o.user.name,
+          name: displayName(o.user),
           summary: o.items.map((i) => `${i.quantity}× ${i.name}`).join(", "),
         }))}
         roundId={round.id}
         currency={settings.currency}
         showPrices={settings.showPrices}
         dayLabel={dayLabel}
-        guest={guest ? { name: guest.name, phone: guest.phone ?? "" } : null}
+        colleagues={colleagues}
+        alreadyOrdered={roundOrders.map((o) => o.userId)}
         menu={menu.map((m) => ({ id: m.id, name: m.name, description: m.description, category: m.category, price: m.price, emoji: m.emoji, imageUrl: m.imageUrl }))}
         existing={
           myOrder

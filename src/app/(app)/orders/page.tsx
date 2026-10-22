@@ -1,5 +1,4 @@
-import Link from "next/link";
-import { getGuest } from "@/lib/auth";
+import { requireUser } from "@/lib/auth";
 import { db, getSettings } from "@/lib/db";
 import { formatDate, formatTime, money } from "@/lib/format";
 
@@ -7,20 +6,10 @@ export const metadata = { title: "My Orders" };
 export const dynamic = "force-dynamic";
 
 export default async function MyOrdersPage() {
-  const guest = await getGuest();
-  if (!guest) {
-    return (
-      <div className="mx-auto flex max-w-xl flex-col items-center py-16 text-center animate-rise">
-        <p className="eyebrow">History</p>
-        <h1 className="page-title mt-3">My orders</h1>
-        <p className="mt-4 text-lg text-muted">Place an order from this device and your lunch history will appear here.</p>
-        <Link href="/" className="btn-primary mt-8">Go to the menu</Link>
-      </div>
-    );
-  }
+  const user = await requireUser();
   const [orders, settings] = await Promise.all([
     db.order.findMany({
-      where: { userId: guest.id },
+      where: { userId: user.id },
       include: { items: true, round: true },
       orderBy: { round: { date: "desc" } },
       take: 60,

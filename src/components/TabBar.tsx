@@ -17,7 +17,7 @@ export function TabBar({ admin }: { admin: boolean }) {
 
   return (
     <nav
-      className="glass fixed inset-x-0 bottom-0 z-40 border-t border-line pb-[env(safe-area-inset-bottom)] sm:hidden"
+      className="fixed inset-x-0 bottom-0 z-40 border-t border-line bg-[#111113]/95 pb-[env(safe-area-inset-bottom)] backdrop-blur-xl sm:hidden"
       aria-label="Main"
     >
       <div className="mx-auto flex h-16 max-w-md items-stretch justify-around">

@@ -15,18 +15,23 @@ npm run dev
 
 Open http://localhost:3000.
 
-- **Employees** don't sign in. They pick a dish and enter their name and phone number. The device remembers them after the first order.
-- **Admins** sign in at `/login` (default: `admin@nasco.com` / `admin1234` — change it under Admin → People).
+## Signing in
 
-## How it works
+- **Staff** sign in with their **phone number and a 4-digit PIN**. An admin adds them under Admin → People, and they get an SMS link to set their PIN. The link lasts 30 days, and signing in lasts 30 days.
+- **Forgot PIN:** tap "Forgot PIN?" on the sign-in page to get a new link by SMS, or an admin taps "Reset PIN" under People.
+- Five wrong PINs lock the account for 15 minutes.
+- **Admins** sign in at `/login?admin` with email and password (default `admin@nasco.com` / `admin1234`, change it under People). An admin with a phone number can also use phone + PIN.
 
-1. **Admin opens a round** (Admin → Today) with a cut-off time.
-2. **Employees order** from that day's menu. Rules:
-   - one order per person (phone number) per day
-   - you can order **for someone else** using their name and phone; it counts as their order for the day
+## How ordering works
+
+1. An admin opens a round (Admin → Today) with a cut-off time.
+2. Staff choose **one meal**. Rules:
+   - one order per person per day
+   - you can order **for someone else**: pick a colleague from the staff list, or add someone not on the list (Visitor, Intern, National Service, Contractor, Other)
+   - you can't order for someone who has already ordered
    - you can change or cancel your own order, and cancel orders you placed for others, until the cut-off
-3. **At the cut-off** the round closes and the combined order is sent to the restaurant by SMS, with a summary, each person's order and notes.
-4. The admin can also **Close & send now**, add 15 minutes, **re-send**, or tap **Send on WhatsApp** to send the same message from their own WhatsApp.
+3. At the cut-off, the combined order goes to the restaurant by SMS. Guests show with their type, e.g. "Kofi Mensah (Visitor)".
+4. The admin can also **Close & send now**, add 15 minutes, **re-send**, or **Send on WhatsApp**.
 
 ### Weekly menu
 

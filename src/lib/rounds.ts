@@ -1,6 +1,6 @@
 import "server-only";
 import { db, getSettings } from "./db";
-import { formatDate, formatTime, money } from "./format";
+import { displayName, formatDate, formatTime, money } from "./format";
 import { sendMessage, type Channel } from "./messaging";
 
 const roundInclude = {
@@ -62,7 +62,7 @@ export function buildRestaurantMessage(
   round.orders.forEach((order, i) => {
     const what = order.items.map((it) => `${it.quantity}× ${it.name}`).join(", ");
     const note = order.notes ? ` (${order.notes})` : "";
-    lines.push(`${i + 1}. ${order.user.name} — ${what}${note}`);
+    lines.push(`${i + 1}. ${displayName(order.user)} — ${what}${note}`);
   });
   lines.push("");
   if (settings.showPrices) lines.push(bold(`Total: ${money(s.total, settings.currency)}`));

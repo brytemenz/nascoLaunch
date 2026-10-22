@@ -72,3 +72,25 @@ export function servedOn(days: string | null | undefined, code: string) {
 export function dayKey(date: Date) {
   return new Intl.DateTimeFormat("en-CA", { timeZone: TIMEZONE, year: "numeric", month: "2-digit", day: "2-digit" }).format(date);
 }
+
+export const PERSON_KINDS = [
+  { code: "STAFF", label: "Staff" },
+  { code: "VISITOR", label: "Visitor" },
+  { code: "INTERN", label: "Intern" },
+  { code: "NSS", label: "National Service" },
+  { code: "CONTRACTOR", label: "Contractor" },
+  { code: "OTHER", label: "Other" },
+] as const;
+
+/** "Visitor", "Intern", "Driver (Other)"… or null for regular staff. */
+export function kindLabel(kind: string, note?: string | null) {
+  if (kind === "STAFF") return null;
+  if (kind === "OTHER") return note?.trim() || "Guest";
+  return PERSON_KINDS.find((k) => k.code === kind)?.label ?? null;
+}
+
+/** Name with their type, e.g. "Kofi Mensah (Visitor)". */
+export function displayName(p: { name: string; kind?: string | null; kindNote?: string | null }) {
+  const label = kindLabel(p.kind ?? "STAFF", p.kindNote);
+  return label ? `${p.name} (${label})` : p.name;
+}

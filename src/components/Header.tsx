@@ -1,14 +1,13 @@
-import { forgetMe, logout } from "@/actions/auth";
+import { logout } from "@/actions/auth";
 import { Avatar } from "./Avatar";
 import { Icon } from "./Icon";
 import { Logo } from "./Logo";
 import { NavLinks, type NavItem } from "./NavLinks";
 
-type Person = { name: string; phone?: string | null };
+type Person = { name: string; phone: string | null; role: string };
 
-export function Header({ admin, guest }: { admin: Person | null; guest: Person | null }) {
-  const person = admin ?? guest;
-  // Admin link only for signed-in admins; others reach it via /login.
+export function Header({ user }: { user: Person }) {
+  const admin = user.role === "ADMIN";
   const items: NavItem[] = [
     { href: "/", label: "Order" },
     { href: "/orders", label: "My Orders" },
@@ -26,24 +25,20 @@ export function Header({ admin, guest }: { admin: Person | null; guest: Person |
         </div>
 
         <div className="flex items-center justify-end gap-3">
-          {person && (
-            <>
-              <div className="hidden text-right lg:block">
-                <div className="text-[13px] font-medium leading-tight">{person.name}</div>
-                <div className="text-[11px] text-subtle leading-tight">{admin ? "Administrator" : person.phone}</div>
-              </div>
-              <Avatar name={person.name} size="h-8 w-8 text-[12px] sm:h-9 sm:w-9 sm:text-[13px]" />
-              <form action={admin ? logout : forgetMe}>
-                <button
-                  className="grid h-9 w-9 place-items-center rounded-full text-muted transition hover:bg-white/5 hover:text-fg cursor-pointer"
-                  title={admin ? "Sign out" : "Not you? Forget me on this device"}
-                  aria-label={admin ? "Sign out" : "Forget me on this device"}
-                >
-                  <Icon name="logout" className="h-[18px] w-[18px]" />
-                </button>
-              </form>
-            </>
-          )}
+          <div className="hidden text-right lg:block">
+            <div className="text-[13px] font-medium leading-tight">{user.name}</div>
+            <div className="text-[11px] text-subtle leading-tight">{admin ? "Administrator" : user.phone}</div>
+          </div>
+          <Avatar name={user.name} size="h-8 w-8 text-[12px] sm:h-9 sm:w-9 sm:text-[13px]" />
+          <form action={logout}>
+            <button
+              className="grid h-9 w-9 place-items-center rounded-full text-muted transition hover:bg-white/5 hover:text-fg cursor-pointer"
+              title="Sign out"
+              aria-label="Sign out"
+            >
+              <Icon name="logout" className="h-[18px] w-[18px]" />
+            </button>
+          </form>
         </div>
       </div>
     </header>

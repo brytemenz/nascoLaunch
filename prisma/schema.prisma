@@ -13,10 +13,22 @@ datasource db {
 model User {
   id           String   @id @default(cuid())
   name         String
-  phone        String?  @unique // employees are identified by phone
-  email        String?  @unique // only admins need email + password
+  phone        String?  @unique // staff sign in with phone + PIN
+  email        String?  @unique // admins can also sign in with email + password
   passwordHash String?
+  pinHash      String?
+  // One-time link sent by SMS so a person can set (or reset) their PIN
+  setupToken        String?   @unique
+  setupTokenExpires DateTime?
+  setupSentAt       DateTime?
+  // Lock the account briefly after repeated wrong PINs
+  failedPinAttempts Int       @default(0)
+  lockedUntil       DateTime?
   role         String   @default("USER") // USER | ADMIN
+  // Who they are: STAFF, VISITOR, INTERN, NSS (national service), CONTRACTOR or OTHER.
+  // Non-staff ordered for by a colleague have no phone and can't sign in.
+  kind         String   @default("STAFF")
+  kindNote     String? // description when kind is OTHER
   department   String?
   active       Boolean  @default(true)
   createdAt    DateTime @default(now())

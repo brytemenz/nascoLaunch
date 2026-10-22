@@ -8,6 +8,7 @@ import { requireAdmin } from "@/lib/auth";
 import { closeAndDispatch, dispatchRound } from "@/lib/rounds";
 import { sendMessage } from "@/lib/messaging";
 import { appUrl, buildMenuMessage, menuForRound } from "@/lib/share";
+import { sendPinSetupLink } from "@/lib/pin";
 import { normalisePhone, WEEKDAYS } from "@/lib/format";
 import type { FormState } from "./auth";
 
@@ -138,6 +139,8 @@ const userSchema = z.object({
   email: z.string().trim().toLowerCase().email("Enter a valid email").optional().or(z.literal("")),
   department: z.string().trim().optional(),
   role: z.enum(["USER", "ADMIN"]),
+  kind: z.enum(["STAFF", "INTERN", "NSS", "CONTRACTOR", "VISITOR", "OTHER"]).default("STAFF"),
+  kindNote: z.string().trim().max(40).optional(),
   password: z.string().optional(),
 });
 
@@ -157,18 +160,40 @@ export async function createUser(_: FormState, form: FormData): Promise<FormStat
   if (email && (await db.user.findUnique({ where: { email } }))) return { error: "That email is already registered" };
   if (phone && (await db.user.findUnique({ where: { phone } }))) return { error: "That phone number is already registered" };
 
-  await db.user.create({
+  const user = await db.user.create({
     data: {
       name,
       role,
       email,
       phone,
       department: parsed.data.department || null,
+      kind: role === "ADMIN" ? "STAFF" : parsed.data.kind,
+      kindNote: parsed.data.kind === "OTHER" ? parsed.data.kindNote || null : null,
       passwordHash: password ? await bcrypt.hash(password, 10) : null,
     },
   });
   refreshAdmin();
-  return { success: `${name} added` };
+  if (!phone) return { success: `${name} added` };
+
+  // Text them a link to set their PIN.
+  const { link, result } = await sendPinSetupLink(user.id);
+  return describeInvite(name, link, result.status, result.detail);
+}
+
+/** (Re)sends the "set your PIN" SMS. Also how an admin resets someone's PIN. */
+export async function resendPinLink(userId: string): Promise<FormState> {
+  await requireAdmin();
+  const user = await db.user.findUnique({ where: { id: userId } });
+  if (!user?.phone) return { error: "This person has no phone number" };
+  const { link, result } = await sendPinSetupLink(user.id);
+  refreshAdmin();
+  return describeInvite(user.name, link, result.status, result.detail);
+}
+
+function describeInvite(name: string, link: string, status: string, detail: string): FormState {
+  if (status === "SENT") return { success: `PIN setup link texted to ${name}.`, link };
+  if (status === "SIMULATED") return { success: `SMS isn't set up, so nothing was texted. Share this link with ${name}:`, link };
+  return { error: `Couldn't text ${name} (${detail}). Share this link with them instead:`, link };
 }
 
 export async function setUserRole(userId: string, role: "USER" | "ADMIN"): Promise<FormState> {

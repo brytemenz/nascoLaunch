@@ -5,7 +5,7 @@ import { RoundActions } from "./RoundActions";
 import { ShareMenu } from "./ShareMenu";
 import { appUrl, buildMenuMessage, menuForRound } from "@/lib/share";
 import { buildRestaurantMessage, describeCutoff, getRoundWithOrders, summarise } from "@/lib/rounds";
-import { formatDate, formatTime, money, normalisePhone } from "@/lib/format";
+import { displayName, formatDate, formatTime, money, normalisePhone } from "@/lib/format";
 import { db, getSettings } from "@/lib/db";
 
 export async function RoundDetail({ roundId, canDelete = false }: { roundId: string; canDelete?: boolean }) {
@@ -127,7 +127,7 @@ export async function RoundDetail({ roundId, canDelete = false }: { roundId: str
                   <Avatar name={order.user.name} />
                   <div className="min-w-0 flex-1">
                     <div className="flex items-baseline justify-between gap-3">
-                      <span className="font-medium truncate">{order.user.name}</span>
+                      <span className="font-medium truncate">{displayName(order.user)}</span>
                       {settings.showPrices && <span className="text-sm font-semibold tabular-nums">{money(order.total, settings.currency)}</span>}
                     </div>
                     <div className="mt-1 text-sm text-muted">

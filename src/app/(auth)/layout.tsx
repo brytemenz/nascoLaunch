@@ -20,7 +20,7 @@ export default function AuthLayout({ children }: { children: React.ReactNode }) 
           </p>
         </div>
         <div className="relative flex gap-8 text-sm text-muted">
-          <Stat value="No login" label="just name & phone" />
+          <Stat value="1 meal" label="per person, per day" />
           <Stat value="0 calls" label="to the restaurant" />
           <Stat value="On time" label="every day" />
         </div>
