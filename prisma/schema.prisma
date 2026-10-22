@@ -1,0 +1,105 @@
+// Postgres on Neon. DATABASE_URL uses the pooled connection (for the app);
+// DIRECT_URL is the direct connection (for schema changes).
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+model User {
+  id           String   @id @default(cuid())
+  name         String
+  phone        String?  @unique // employees are identified by phone
+  email        String?  @unique // only admins need email + password
+  passwordHash String?
+  role         String   @default("USER") // USER | ADMIN
+  department   String?
+  active       Boolean  @default(true)
+  createdAt    DateTime @default(now())
+  orders       Order[]  @relation("OrderFor")
+  placedOrders Order[]  @relation("OrderPlacedBy")
+}
+
+model MenuItem {
+  id          String      @id @default(cuid())
+  name        String
+  description String?
+  category    String      @default("Mains")
+  price       Float       @default(0)
+  days        String      @default("") // e.g. "MON,WED". Empty = every day
+  emoji       String?
+  imageUrl    String? // photo shown on the menu, e.g. /menu/waakye.jpg
+  available   Boolean     @default(true)
+  createdAt   DateTime    @default(now())
+  orderItems  OrderItem[]
+}
+
+// One lunch round. Employees order while it is OPEN.
+// When it closes, the combined order is sent to the restaurant.
+model LunchRound {
+  id         String        @id @default(cuid())
+  title      String
+  date       DateTime
+  closesAt   DateTime
+  status     String        @default("OPEN") // OPEN | CLOSED
+  closedAt   DateTime?
+  createdAt  DateTime      @default(now())
+  orders     Order[]
+  dispatches DispatchLog[]
+}
+
+model Order {
+  id        String      @id @default(cuid())
+  userId    String
+  roundId   String
+  notes     String?
+  total     Float       @default(0)
+  createdAt DateTime    @default(now())
+  updatedAt DateTime    @updatedAt
+  placedById String? // who placed it, when ordering on someone's behalf
+  user      User        @relation("OrderFor", fields: [userId], references: [id], onDelete: Cascade)
+  placedBy  User?       @relation("OrderPlacedBy", fields: [placedById], references: [id], onDelete: SetNull)
+  round     LunchRound  @relation(fields: [roundId], references: [id], onDelete: Cascade)
+  items     OrderItem[]
+
+  @@unique([userId, roundId])
+}
+
+model OrderItem {
+  id         String    @id @default(cuid())
+  orderId    String
+  menuItemId String?
+  name       String // snapshot so history survives menu edits
+  price      Float
+  quantity   Int
+  order      Order     @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  menuItem   MenuItem? @relation(fields: [menuItemId], references: [id], onDelete: SetNull)
+}
+
+model DispatchLog {
+  id        String     @id @default(cuid())
+  roundId   String
+  channel   String // WHATSAPP | SMS
+  recipient String
+  status    String // SENT | FAILED | SIMULATED
+  detail    String?
+  createdAt DateTime   @default(now())
+  round     LunchRound @relation(fields: [roundId], references: [id], onDelete: Cascade)
+}
+
+// Single row of app settings (id = "app").
+model Settings {
+  id               String  @id @default("app")
+  companyName      String  @default("NASCO")
+  restaurantName   String  @default("Our Restaurant")
+  restaurantPhone  String  @default("")
+  restaurantWhatsapp String @default("")
+  currency         String  @default("GH₵")
+  sendWhatsapp     Boolean @default(true)
+  sendSms          Boolean @default(true)
+  showPrices       Boolean @default(false)
+}
