@@ -6,14 +6,14 @@ import { NavLinks, type NavItem } from "./NavLinks";
 
 type Person = { name: string; phone?: string | null };
 
-const items: NavItem[] = [
-  { href: "/", label: "Order" },
-  { href: "/orders", label: "My Orders" },
-  { href: "/admin", label: "Admin" },
-];
-
 export function Header({ admin, guest }: { admin: Person | null; guest: Person | null }) {
   const person = admin ?? guest;
+  // Admin link only for signed-in admins; others reach it via /login.
+  const items: NavItem[] = [
+    { href: "/", label: "Order" },
+    { href: "/orders", label: "My Orders" },
+    ...(admin ? [{ href: "/admin", label: "Admin" }] : []),
+  ];
 
   return (
     <header className="glass sticky top-0 z-40 border-b border-line">

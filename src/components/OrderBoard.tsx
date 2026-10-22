@@ -253,11 +253,6 @@ export function OrderBoard({ roundId, currency, menu, existing, forOthers, guest
         })}
       </div>
 
-      <p className="mt-10 text-center text-xs text-subtle">
-        Photos: Pexels and Wikimedia Commons ·{" "}
-        <a href="/menu/CREDITS.md" className="underline hover:text-muted">credits</a>
-      </p>
-
       {/* Bag bar */}
       <div className="fixed inset-x-0 bottom-0 z-40 px-4 pb-4 sm:pb-6">
         <div
