@@ -16,13 +16,12 @@ export function Header({ admin, guest }: { admin: Person | null; guest: Person |
   ];
 
   return (
-    <header className="glass sticky top-0 z-40 border-b border-line">
-      <div className="mx-auto grid h-16 max-w-6xl grid-cols-[auto_1fr_auto] items-center gap-3 px-4 sm:px-6">
-        {/* Logo: icon only on phones */}
-        <div className="sm:hidden"><Logo subtitle={false} compact /></div>
-        <div className="hidden sm:block"><Logo /></div>
+    <header className="glass sticky top-0 z-40 border-b border-line pt-[env(safe-area-inset-top)]">
+      <div className="mx-auto grid h-14 max-w-6xl grid-cols-[auto_1fr_auto] items-center gap-3 px-4 sm:h-16 sm:px-6">
+        <Logo />
 
-        <div className="flex justify-center">
+        {/* Phones use the bottom tab bar instead */}
+        <div className="hidden justify-center sm:flex">
           <NavLinks items={items} />
         </div>
 
@@ -33,7 +32,7 @@ export function Header({ admin, guest }: { admin: Person | null; guest: Person |
                 <div className="text-[13px] font-medium leading-tight">{person.name}</div>
                 <div className="text-[11px] text-subtle leading-tight">{admin ? "Administrator" : person.phone}</div>
               </div>
-              <span className="hidden sm:block"><Avatar name={person.name} /></span>
+              <Avatar name={person.name} size="h-8 w-8 text-[12px] sm:h-9 sm:w-9 sm:text-[13px]" />
               <form action={admin ? logout : forgetMe}>
                 <button
                   className="grid h-9 w-9 place-items-center rounded-full text-muted transition hover:bg-white/5 hover:text-fg cursor-pointer"

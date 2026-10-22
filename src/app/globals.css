@@ -48,6 +48,7 @@
 
 html {
   background: var(--color-ink);
+  -webkit-tap-highlight-color: transparent; /* no grey flash on tap */
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   text-rendering: optimizeLegibility;
@@ -59,6 +60,25 @@ body {
   font-family: var(--font-sans);
   letter-spacing: -0.011em;
   min-height: 100dvh;
+}
+
+/* App-like touch behaviour */
+button,
+a {
+  touch-action: manipulation;
+}
+@media (max-width: 639px) {
+  button,
+  nav a {
+    -webkit-user-select: none;
+    user-select: none;
+  }
+  /* 16px inputs stop iOS from zooming in on focus */
+  input,
+  textarea,
+  select {
+    font-size: 16px !important;
+  }
 }
 
 ::selection {

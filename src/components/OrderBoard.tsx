@@ -142,8 +142,8 @@ export function OrderBoard({ roundId, currency, menu, existing, forOthers, guest
   return (
     <>
       {/* Who is this order for? */}
-      <div className="mt-12 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-        <div className="inline-flex self-start rounded-full border border-line bg-card p-1">
+      <div className="mt-6 flex flex-col gap-4 sm:mt-12 sm:flex-row sm:items-center sm:justify-between">
+        <div className="grid grid-cols-2 rounded-full border border-line bg-card p-1 sm:inline-flex sm:self-start">
           {(["me", "other"] as const).map((m) => (
             <button
               key={m}
@@ -199,53 +199,78 @@ export function OrderBoard({ roundId, currency, menu, existing, forOthers, guest
         </div>
       )}
 
-      {/* Menu */}
-      <div className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+      {/* Menu: list rows on phones, cards on larger screens */}
+      <div className="mt-5 grid gap-3 sm:mt-6 sm:grid-cols-2 sm:gap-4 lg:grid-cols-3">
         {visible.map((item, i) => {
           const q = qty[item.id] ?? 0;
+          const stepper =
+            q === 0 ? (
+              <button
+                onClick={() => change(item.id, 1)}
+                aria-label={`Add ${item.name}`}
+                className="btn-secondary btn-sm h-9 px-3 hover:border-brand/40 hover:text-brand-light sm:px-4"
+              >
+                <Icon name="plus" className="h-4 w-4" strokeWidth={2.2} /> Add
+              </button>
+            ) : (
+              <div className="flex items-center gap-1 rounded-full bg-brand p-1 text-black animate-pop">
+                <button onClick={() => change(item.id, -1)} aria-label={`Remove one ${item.name}`} className="grid h-8 w-8 place-items-center rounded-full active:bg-black/15 hover:bg-black/10 cursor-pointer sm:h-7 sm:w-7">
+                  <Icon name="minus" className="h-4 w-4" strokeWidth={2.5} />
+                </button>
+                <span className="w-5 text-center text-sm font-semibold tabular-nums">{q}</span>
+                <button onClick={() => change(item.id, 1)} aria-label={`Add one ${item.name}`} className="grid h-8 w-8 place-items-center rounded-full active:bg-black/15 hover:bg-black/10 cursor-pointer sm:h-7 sm:w-7">
+                  <Icon name="plus" className="h-4 w-4" strokeWidth={2.5} />
+                </button>
+              </div>
+            );
+          const photo = item.imageUrl ? (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img src={item.imageUrl} alt={item.name} loading="lazy" className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-[1.04]" />
+          ) : (
+            <div className="grid h-full place-items-center text-4xl sm:text-6xl">{item.emoji || "🍲"}</div>
+          );
           return (
             <article
               key={item.id}
               style={{ animationDelay: `${Math.min(i, 12) * 40}ms` }}
-              className={`card group relative flex flex-col overflow-hidden transition-all duration-300 animate-rise hover:-translate-y-0.5 hover:border-line-strong ${
+              className={`card group relative overflow-hidden transition-all duration-300 animate-rise sm:hover:-translate-y-0.5 sm:hover:border-line-strong ${
                 q > 0 ? "border-brand/60! shadow-[0_0_0_1px_rgb(255_122_0/0.35),0_24px_60px_-24px_rgb(255_122_0/0.55)]" : ""
               }`}
             >
-              <div className="relative aspect-[4/3] overflow-hidden bg-elevated">
-                {item.imageUrl ? (
-                  // eslint-disable-next-line @next/next/no-img-element
-                  <img src={item.imageUrl} alt={item.name} loading="lazy" className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-[1.04]" />
-                ) : (
-                  <div className="grid h-full place-items-center text-6xl">{item.emoji || "🍲"}</div>
-                )}
-                <div className="absolute inset-0 bg-gradient-to-t from-card via-card/10 to-transparent" />
-                {q > 0 && (
-                  <span className="absolute right-3 top-3 grid h-8 min-w-8 place-items-center rounded-full bg-brand px-2 text-sm font-bold text-black shadow-lg animate-pop">
-                    {q}
-                  </span>
-                )}
+              {/* Phone: row */}
+              <div className="flex items-center gap-3 p-2.5 sm:hidden">
+                <div className="relative h-[88px] w-[88px] shrink-0 overflow-hidden rounded-2xl bg-elevated">
+                  {photo}
+                  {q > 0 && <span className="absolute inset-0 rounded-2xl ring-2 ring-inset ring-brand" />}
+                </div>
+                <div className="flex min-w-0 flex-1 flex-col self-stretch py-1 pr-1">
+                  <h3 className="text-[16px] font-semibold leading-snug tracking-tight">{item.name}</h3>
+                  {item.description && <p className="mt-0.5 text-[13px] text-muted line-clamp-1">{item.description}</p>}
+                  <div className="mt-auto flex items-center justify-between gap-2 pt-2">
+                    <span className="text-sm font-semibold tabular-nums text-muted">{showPrices ? money(item.price, currency) : ""}</span>
+                    {stepper}
+                  </div>
+                </div>
               </div>
 
-              <div className="relative -mt-6 flex flex-1 flex-col px-5 pb-5">
-                <h3 className="text-[18px] font-semibold tracking-tight">{item.name}</h3>
-                {item.description && <p className="mt-1 text-sm leading-relaxed text-muted line-clamp-2">{item.description}</p>}
-                <div className="mt-auto flex items-center justify-between gap-3 pt-5">
-                  <span className="text-[16px] font-semibold tabular-nums text-muted">{showPrices ? money(item.price, currency) : ""}</span>
-                  {q === 0 ? (
-                    <button onClick={() => change(item.id, 1)} className="btn-secondary btn-sm hover:border-brand/40 hover:text-brand-light">
-                      <Icon name="plus" className="h-4 w-4" strokeWidth={2.2} /> Add
-                    </button>
-                  ) : (
-                    <div className="flex items-center gap-1 rounded-full bg-brand p-1 text-black animate-pop">
-                      <button onClick={() => change(item.id, -1)} aria-label={`Remove one ${item.name}`} className="grid h-7 w-7 place-items-center rounded-full hover:bg-black/10 cursor-pointer">
-                        <Icon name="minus" className="h-4 w-4" strokeWidth={2.5} />
-                      </button>
-                      <span className="w-6 text-center text-sm font-semibold tabular-nums">{q}</span>
-                      <button onClick={() => change(item.id, 1)} aria-label={`Add one ${item.name}`} className="grid h-7 w-7 place-items-center rounded-full hover:bg-black/10 cursor-pointer">
-                        <Icon name="plus" className="h-4 w-4" strokeWidth={2.5} />
-                      </button>
-                    </div>
+              {/* Tablet & desktop: card */}
+              <div className="hidden h-full flex-col sm:flex">
+                <div className="relative aspect-[4/3] overflow-hidden bg-elevated">
+                  {photo}
+                  <div className="absolute inset-0 bg-gradient-to-t from-card via-card/10 to-transparent" />
+                  {q > 0 && (
+                    <span className="absolute right-3 top-3 grid h-8 min-w-8 place-items-center rounded-full bg-brand px-2 text-sm font-bold text-black shadow-lg animate-pop">
+                      {q}
+                    </span>
                   )}
+                </div>
+                <div className="relative -mt-6 flex flex-1 flex-col px-5 pb-5">
+                  <h3 className="text-[18px] font-semibold tracking-tight">{item.name}</h3>
+                  {item.description && <p className="mt-1 text-sm leading-relaxed text-muted line-clamp-2">{item.description}</p>}
+                  <div className="mt-auto flex items-center justify-between gap-3 pt-5">
+                    <span className="text-[16px] font-semibold tabular-nums text-muted">{showPrices ? money(item.price, currency) : ""}</span>
+                    {stepper}
+                  </div>
                 </div>
               </div>
             </article>
@@ -254,7 +279,7 @@ export function OrderBoard({ roundId, currency, menu, existing, forOthers, guest
       </div>
 
       {/* Bag bar */}
-      <div className="fixed inset-x-0 bottom-0 z-40 px-4 pb-4 sm:pb-6">
+      <div className="fixed inset-x-0 bottom-[calc(4rem+env(safe-area-inset-bottom))] z-40 px-3 pb-3 sm:bottom-0 sm:px-4 sm:pb-6">
         <div
           className={`mx-auto max-w-3xl rounded-[26px] border border-line-strong bg-[#161618] p-3 shadow-[0_30px_80px_-20px_rgb(0_0_0/0.9)] backdrop-blur-2xl transition-all duration-500 ${
             count > 0 || hasOrder ? "translate-y-0 opacity-100" : "pointer-events-none translate-y-6 opacity-0"
@@ -279,7 +304,7 @@ export function OrderBoard({ roundId, currency, menu, existing, forOthers, guest
                       type="tel"
                       inputMode="tel"
                       autoComplete="tel"
-                      placeholder="Your phone number"
+                      placeholder="Phone number"
                       aria-label="Phone number"
                       disabled={!!existing && !!guest}
                       className={fieldClass}
@@ -345,7 +370,7 @@ export function OrderBoard({ roundId, currency, menu, existing, forOthers, guest
 
       {/* Toast */}
       {toast && (
-        <div className="fixed inset-x-0 top-20 z-50 flex justify-center px-4 animate-rise" role="status">
+        <div className="fixed inset-x-0 top-[calc(4rem+env(safe-area-inset-top))] z-50 flex justify-center px-4 animate-rise sm:top-20" role="status">
           <div className={`flex items-center gap-2.5 rounded-full border bg-[#161618]/95 px-5 py-3 text-sm font-medium shadow-2xl backdrop-blur-xl ${toast.ok ? "border-success/30" : "border-danger/30"}`}>
             <span className={`grid h-5 w-5 shrink-0 place-items-center rounded-full ${toast.ok ? "bg-success text-black" : "bg-danger text-white"}`}>
               <Icon name={toast.ok ? "check" : "x"} className="h-3 w-3" strokeWidth={3} />

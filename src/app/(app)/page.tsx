@@ -100,17 +100,30 @@ export default async function OrderPage() {
 
   return (
     <>
-      <section className="flex flex-col gap-8 sm:flex-row sm:items-end sm:justify-between animate-rise">
+      <section className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between sm:gap-8 animate-rise">
         <div>
           <p className="eyebrow">{hello}</p>
-          <h1 className="page-title mt-3">
+          <h1 className="mt-2 text-[34px] font-semibold leading-[1.05] tracking-[-0.03em] sm:mt-3 sm:text-5xl">
             What&apos;s for <span className="text-gradient">lunch</span>?
           </h1>
-          <p className="mt-4 text-lg text-muted">
+          <p className="mt-2 text-[15px] text-muted sm:mt-4 sm:text-lg">
             {round.title} · from {settings.restaurantName}
           </p>
         </div>
-        <div className="card shrink-0 px-6 py-5">
+
+        {/* Phone: compact countdown chip */}
+        <div className="flex items-center gap-2 self-start rounded-full border border-brand/25 bg-brand/10 px-3.5 py-2 text-[13px] sm:hidden">
+          <span className="relative flex h-2 w-2">
+            <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-brand opacity-60" />
+            <span className="relative inline-flex h-2 w-2 rounded-full bg-brand" />
+          </span>
+          <span className="text-muted">Closes in</span>
+          <span className="font-semibold text-brand-light"><Countdown to={round.closesAt.toISOString()} compact /></span>
+          <span className="text-subtle">· {formatTime(round.closesAt)}</span>
+        </div>
+
+        {/* Larger screens: countdown card */}
+        <div className="card hidden shrink-0 px-6 py-5 sm:block">
           <div className="flex items-center gap-2 text-[13px] text-muted">
             <span className="relative flex h-2 w-2">
               <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-brand opacity-60" />

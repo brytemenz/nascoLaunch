@@ -11,6 +11,8 @@ export async function generateMetadata(): Promise<Metadata> {
     metadataBase: new URL(await appUrl()),
     title: { default: "NASCO Lunch", template: "%s · NASCO Lunch" },
     description,
+    // Full-screen "app" when added to the iPhone home screen
+    appleWebApp: { capable: true, statusBarStyle: "black-translucent", title: "Lunch" },
     // Link preview when the menu is shared on WhatsApp, SMS, etc.
     openGraph: {
       title: "NASCO Lunch — today's menu",
@@ -23,6 +25,7 @@ export async function generateMetadata(): Promise<Metadata> {
 
 export const viewport: Viewport = {
   themeColor: "#000000",
+  viewportFit: "cover", // draw under the iPhone notch; we pad with safe-area insets
 };
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
