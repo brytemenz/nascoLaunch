@@ -5,6 +5,7 @@ import { cancelOrder, saveOrder } from "@/actions/orders";
 import { money } from "@/lib/format";
 import { Icon } from "./Icon";
 import { Spinner } from "./SubmitButton";
+import { useConfirm } from "./Confirm";
 
 type MenuItem = {
   id: string;
@@ -50,6 +51,7 @@ export function OrderBoard({ roundId, currency, menu, existing, forOthers, colle
   const [category, setCategory] = useState("All");
   const [toast, setToast] = useState<{ ok: boolean; message: string } | null>(null);
   const [pending, startTransition] = useTransition();
+  const confirm = useConfirm();
 
   // Ordering for someone else
   const [who, setWho] = useState<"colleague" | "guest">("colleague");
@@ -122,8 +124,15 @@ export function OrderBoard({ roundId, currency, menu, existing, forOthers, colle
     });
   }
 
-  function cancel(orderId: string, label: string) {
-    if (!confirm(`Cancel ${label}?`)) return;
+  async function cancel(orderId: string, label: string) {
+    const ok = await confirm({
+      title: `Cancel ${label}?`,
+      message: "You can order again before ordering closes.",
+      confirmLabel: "Cancel order",
+      cancelLabel: "Keep it",
+      tone: "danger",
+    });
+    if (!ok) return;
     startTransition(async () => {
       const result = await cancelOrder(orderId);
       if (result.ok && orderId === existing?.id) {

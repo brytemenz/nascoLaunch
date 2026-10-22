@@ -6,6 +6,7 @@ import { FormMessage } from "../FormMessage";
 import { Icon } from "../Icon";
 import { Spinner } from "../SubmitButton";
 import { Sheet } from "./Sheet";
+import { useConfirm } from "../Confirm";
 
 type Props = {
   roundId: string;
@@ -21,6 +22,7 @@ export function ShareMenu({ roundId, message, url, dayLabel, dishCount, staffCou
   const [copied, setCopied] = useState<"message" | "link" | null>(null);
   const [state, setState] = useState<{ error?: string; success?: string }>();
   const [pending, start] = useTransition();
+  const confirm = useConfirm();
   const isLocal = /localhost|127\.0\.0\.1/.test(url);
 
   async function copy(text: string, what: "message" | "link") {
@@ -41,8 +43,13 @@ export function ShareMenu({ roundId, message, url, dayLabel, dishCount, staffCou
     }
   }
 
-  function smsStaff() {
-    if (!confirm(`Text the menu to ${staffCount} ${staffCount === 1 ? "person" : "people"}? Each SMS uses Arkesel credit.`)) return;
+  async function smsStaff() {
+    const ok = await confirm({
+      title: `Text the menu to ${staffCount} ${staffCount === 1 ? "person" : "people"}?`,
+      message: "Each message uses SMS credit.",
+      confirmLabel: "Send SMS",
+    });
+    if (!ok) return;
     start(async () => setState(await smsMenuToStaff(roundId)));
   }
 

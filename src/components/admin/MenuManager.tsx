@@ -7,6 +7,7 @@ import { FormMessage } from "../FormMessage";
 import { Icon } from "../Icon";
 import { SubmitButton } from "../SubmitButton";
 import { Sheet } from "./Sheet";
+import { useConfirm } from "../Confirm";
 
 type Item = {
   id: string;
@@ -126,6 +127,7 @@ function ItemForm({
   const [emoji, setEmoji] = useState(item?.emoji ?? "🍛");
   const [imageUrl, setImageUrl] = useState(item?.imageUrl ?? "");
   const [deleting, startDelete] = useTransition();
+  const confirm = useConfirm();
 
   useEffect(() => {
     if (state?.success) onDone();
@@ -209,8 +211,14 @@ function ItemForm({
             type="button"
             className="btn-danger h-12"
             disabled={deleting}
-            onClick={() => {
-              if (!confirm(`Delete ${item.name}? Past orders keep their history.`)) return;
+            onClick={async () => {
+              const ok = await confirm({
+                title: `Delete ${item.name}?`,
+                message: "It disappears from the menu. Past orders keep their history.",
+                confirmLabel: "Delete",
+                tone: "danger",
+              });
+              if (!ok) return;
               startDelete(async () => {
                 await deleteMenuItem(item.id);
                 onDone();

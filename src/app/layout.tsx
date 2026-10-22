@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
 import { appUrl } from "@/lib/share";
+import { ConfirmProvider } from "@/components/Confirm";
 
 const inter = Inter({ subsets: ["latin"], variable: "--font-inter", display: "swap" });
 
@@ -33,7 +34,9 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
     <html lang="en" className={inter.variable}>
       <body>
         <div className="ambient" aria-hidden />
-        <div className="relative z-10">{children}</div>
+        <div className="relative z-10">
+          <ConfirmProvider>{children}</ConfirmProvider>
+        </div>
       </body>
     </html>
   );
