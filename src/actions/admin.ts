@@ -233,6 +233,7 @@ const settingsSchema = z.object({
   restaurantPhone: z.string().trim(),
   restaurantWhatsapp: z.string().trim(),
   currency: z.string().trim().min(1).max(6),
+  mealPrice: z.coerce.number().min(0, "Meal price can't be negative").max(10000),
 });
 
 export async function saveSettings(_: FormState, form: FormData): Promise<FormState> {

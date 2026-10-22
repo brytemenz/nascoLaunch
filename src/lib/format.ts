@@ -1,7 +1,7 @@
 export const TIMEZONE = process.env.NEXT_PUBLIC_APP_TIMEZONE || "Africa/Accra";
 
-export function money(amount: number, currency = "GH₵") {
-  return `${currency} ${amount.toFixed(2)}`;
+export function money(amount: number | null | undefined, currency = "GH₵") {
+  return `${currency} ${Number(amount ?? 0).toFixed(2)}`;
 }
 
 export function formatDate(date: Date, opts: Intl.DateTimeFormatOptions = {}) {

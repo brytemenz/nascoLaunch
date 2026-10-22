@@ -2,7 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
-import { db } from "@/lib/db";
+import { db, getSettings } from "@/lib/db";
 import { requireUser } from "@/lib/auth";
 import { dayKey, displayName } from "@/lib/format";
 import { autoCloseDueRounds } from "@/lib/rounds";
@@ -67,8 +67,11 @@ export async function saveOrder(input: OrderInput): Promise<OrderResult> {
   if (!round) return { ok: false, message: "This lunch round no longer exists." };
   if (round.status !== "OPEN") return { ok: false, message: "Ordering for this round has closed." };
 
-  // Prices come from the database, never from the browser.
-  const dish = await db.menuItem.findFirst({ where: { id: menuItemId, available: true } });
+  const [dish, settings] = await Promise.all([
+    db.menuItem.findFirst({ where: { id: menuItemId, available: true } }),
+    getSettings(),
+  ]);
+  const price = settings.mealPrice; // flat cost per meal, recorded at order time for reports
   if (!dish) return { ok: false, message: "That meal is no longer available. Please refresh the menu." };
 
   const forUserId = parsed.data.forUserId && parsed.data.forUserId !== me.id ? parsed.data.forUserId : null;
@@ -93,11 +96,11 @@ export async function saveOrder(input: OrderInput): Promise<OrderResult> {
   await db.$transaction(async (tx) => {
     const order = await tx.order.upsert({
       where: { userId_roundId: { userId: target.id, roundId } },
-      update: { notes: notes || null, total: dish.price },
-      create: { userId: target.id, roundId, notes: notes || null, total: dish.price, placedById: forSelf ? null : me.id },
+      update: { notes: notes || null, total: price },
+      create: { userId: target.id, roundId, notes: notes || null, total: price, placedById: forSelf ? null : me.id },
     });
     await tx.orderItem.deleteMany({ where: { orderId: order.id } });
-    await tx.orderItem.create({ data: { orderId: order.id, menuItemId: dish.id, name: dish.name, price: dish.price, quantity: 1 } });
+    await tx.orderItem.create({ data: { orderId: order.id, menuItemId: dish.id, name: dish.name, price, quantity: 1 } });
   });
 
   refresh();

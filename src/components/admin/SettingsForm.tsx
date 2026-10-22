@@ -15,6 +15,7 @@ type Settings = {
   sendWhatsapp: boolean;
   sendSms: boolean;
   showPrices: boolean;
+  mealPrice: number;
 };
 
 export function SettingsForm({ settings, providers }: { settings: Settings; providers: { whatsapp: string | null; sms: string | null } }) {
@@ -69,10 +70,15 @@ export function SettingsForm({ settings, providers }: { settings: Settings; prov
               <input id="currency" name="currency" className="input" defaultValue={settings.currency} required />
             </div>
           </div>
+          <div className="mt-5">
+            <label className="label" htmlFor="mealPrice">Cost per meal ({settings.currency})</label>
+            <input id="mealPrice" name="mealPrice" type="number" step="0.01" min="0" className="input max-w-[200px]" defaultValue={settings.mealPrice} required />
+            <p className="mt-2 text-xs text-subtle">Used for expense reports. Changing it only affects new orders.</p>
+          </div>
           <label className="mt-5 flex cursor-pointer items-center gap-3 rounded-2xl border border-line bg-elevated px-4 py-3 has-[:checked]:border-brand/40">
             <span className="flex-1">
-              <span className="block text-[15px]">Show prices</span>
-              <span className="block text-sm text-muted">Turn off if the company pays — prices and totals are hidden from staff and the restaurant message.</span>
+              <span className="block text-[15px]">Show prices to staff</span>
+              <span className="block text-sm text-muted">Off: staff and the restaurant message don&apos;t show prices. Admins always see costs.</span>
             </span>
             <input type="checkbox" name="showPrices" defaultChecked={settings.showPrices} className="h-5 w-5 accent-[#ff7a00]" />
           </label>

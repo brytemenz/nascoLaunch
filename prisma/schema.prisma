@@ -113,5 +113,6 @@ model Settings {
   currency         String  @default("GH₵")
   sendWhatsapp     Boolean @default(true)
   sendSms          Boolean @default(true)
-  showPrices       Boolean @default(false)
+  showPrices       Boolean @default(false) // show prices to staff
+  mealPrice        Float   @default(35)    // flat cost per meal, used for expense reports
 }

@@ -43,7 +43,7 @@ export default async function RoundsPage() {
                 </div>
                 <div className="min-w-0 flex-1 truncate text-muted">{r.title}</div>
                 <div className="hidden w-24 text-right text-sm text-muted sm:block">{r.orders.length} {r.orders.length === 1 ? "order" : "orders"}</div>
-                {settings.showPrices && <div className="hidden w-32 text-right text-sm font-medium tabular-nums sm:block">{money(total, settings.currency)}</div>}
+                <div className="hidden w-32 text-right text-sm font-medium tabular-nums sm:block">{money(total, settings.currency)}</div>
                 <div className="w-28 text-right">
                   {r.status === "OPEN" ? (
                     <span className="chip-brand">Open</span>

@@ -75,11 +75,7 @@ export async function RoundDetail({ roundId, canDelete = false }: { roundId: str
       <section className="grid grid-cols-2 gap-4 lg:grid-cols-4">
         <Stat label="People ordered" value={String(s.people)} />
         <Stat label="Items" value={String(s.meals)} />
-        {settings.showPrices ? (
-          <Stat label="Order value" value={money(s.total, settings.currency)} />
-        ) : (
-          <Stat label="Different dishes" value={String(s.items.length)} />
-        )}
+        <Stat label="Cost" value={money(s.total, settings.currency)} />
         <div className="card p-5">
           <div className="text-sm text-muted">{open ? "Time left" : "Status"}</div>
           <div className="mt-1 text-2xl font-semibold">
@@ -101,7 +97,7 @@ export async function RoundDetail({ roundId, canDelete = false }: { roundId: str
                 <li key={item.name}>
                   <div className="flex items-baseline justify-between text-sm">
                     <span className="font-medium">{item.name}</span>
-                    <span className="tabular-nums"><span className="text-brand-light font-semibold">{item.quantity}</span>{settings.showPrices && <span className="text-subtle"> · {money(item.subtotal, settings.currency)}</span>}</span>
+                    <span className="tabular-nums"><span className="text-brand-light font-semibold">{item.quantity}</span><span className="text-subtle"> · {money(item.subtotal, settings.currency)}</span></span>
                   </div>
                   <div className="mt-2 h-1.5 overflow-hidden rounded-full bg-white/5">
                     <div className="h-full rounded-full bg-gradient-to-r from-brand-dark to-brand-light" style={{ width: `${(item.quantity / maxQty) * 100}%` }} />
@@ -128,7 +124,7 @@ export async function RoundDetail({ roundId, canDelete = false }: { roundId: str
                   <div className="min-w-0 flex-1">
                     <div className="flex items-baseline justify-between gap-3">
                       <span className="font-medium truncate">{displayName(order.user)}</span>
-                      {settings.showPrices && <span className="text-sm font-semibold tabular-nums">{money(order.total, settings.currency)}</span>}
+                      <span className="text-sm text-muted tabular-nums">{money(order.total, settings.currency)}</span>
                     </div>
                     <div className="mt-1 text-sm text-muted">
                       {order.items.map((i) => `${i.quantity}× ${i.name}`).join(" · ")}

@@ -21,6 +21,7 @@ export default async function SettingsPage() {
           sendWhatsapp: s.sendWhatsapp,
           sendSms: s.sendSms,
           showPrices: s.showPrices,
+          mealPrice: s.mealPrice,
         }}
         providers={{ whatsapp: providerFor("WHATSAPP"), sms: providerFor("SMS") }}
       />

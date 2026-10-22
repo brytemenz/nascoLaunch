@@ -21,6 +21,7 @@ const paths: Record<string, string> = {
   arrow: "M5 12h14M13 6l6 6-6 6",
   power: "M12 3v9M6.3 6.3a8 8 0 1 0 11.4 0",
   share: "M12 3v12M7 8l5-5 5 5M5 13v6a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-6",
+  download: "M12 3v12M7 10l5 5 5-5M5 21h14",
   copy: "M9 9h10v12H9V9Zm-4 6V3h10",
   link: "M10 14a4 4 0 0 0 5.7 0l3-3a4 4 0 0 0-5.7-5.7l-1 1M14 10a4 4 0 0 0-5.7 0l-3 3a4 4 0 0 0 5.7 5.7l1-1",
 };

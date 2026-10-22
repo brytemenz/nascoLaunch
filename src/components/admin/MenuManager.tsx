@@ -2,7 +2,7 @@
 
 import { useActionState, useEffect, useState, useTransition } from "react";
 import { deleteMenuItem, saveMenuItem, toggleMenuItem } from "@/actions/admin";
-import { money, parseDays, WEEKDAYS } from "@/lib/format";
+import { parseDays, WEEKDAYS } from "@/lib/format";
 import { FormMessage } from "../FormMessage";
 import { Icon } from "../Icon";
 import { SubmitButton } from "../SubmitButton";
@@ -24,7 +24,7 @@ const EMOJI = ["🍛", "🍚", "🍙", "🌽", "🍗", "🍖", "🐟", "🥗", "
 
 const WORKDAYS = WEEKDAYS.slice(0, 5);
 
-export function MenuManager({ items, currency, showPrices }: { items: Item[]; currency: string; showPrices: boolean }) {
+export function MenuManager({ items }: { items: Item[] }) {
   const [editing, setEditing] = useState<Item | "new" | null>(null);
   const [newForDay, setNewForDay] = useState<string | null>(null);
   const [pending, start] = useTransition();
@@ -84,7 +84,6 @@ export function MenuManager({ items, currency, showPrices }: { items: Item[]; cu
                     <div className="font-medium">{item.name}</div>
                     <div className="truncate text-sm text-muted">{[item.category, item.description].filter(Boolean).join(" · ")}</div>
                   </div>
-                  {showPrices && <div className="hidden w-28 text-right font-medium tabular-nums sm:block">{money(item.price, currency)}</div>}
                   <Toggle checked={item.available} disabled={pending} onChange={() => start(() => toggleMenuItem(item.id))} label={`${item.name} available`} />
                   <button onClick={() => setEditing(item)} className="grid h-9 w-9 place-items-center rounded-full text-muted hover:bg-white/5 hover:text-fg cursor-pointer" aria-label={`Edit ${item.name}`}>
                     <Icon name="edit" className="h-4 w-4" />
@@ -103,7 +102,6 @@ export function MenuManager({ items, currency, showPrices }: { items: Item[]; cu
             item={editing === "new" ? null : editing}
             categories={categories}
             defaultDay={newForDay}
-            showPrices={showPrices}
             onDone={() => setEditing(null)}
           />
         )}
@@ -116,13 +114,11 @@ function ItemForm({
   item,
   categories,
   defaultDay,
-  showPrices,
   onDone,
 }: {
   item: Item | null;
   categories: string[];
   defaultDay: string | null;
-  showPrices: boolean;
   onDone: () => void;
 }) {
   const [days, setDays] = useState<string[]>(() => (item ? parseDays(item.days) : defaultDay ? [defaultDay] : []));
@@ -196,17 +192,13 @@ function ItemForm({
         <label className="label" htmlFor="description">Description</label>
         <textarea id="description" name="description" rows={2} className="input" defaultValue={item?.description ?? ""} placeholder="Smoky party jollof, grilled chicken, coleslaw" />
       </div>
-      <div className="grid grid-cols-2 gap-4">
+      <div>
         <div>
           <label className="label" htmlFor="category">Category</label>
           <input id="category" name="category" list="categories" className="input" defaultValue={item?.category ?? "Mains"} required />
           <datalist id="categories">
             {[...new Set(["Mains", "Sides", "Drinks", ...categories])].map((c) => <option key={c} value={c} />)}
           </datalist>
-        </div>
-        <div>
-          <label className="label" htmlFor="price">Price {!showPrices && <span className="text-subtle">(hidden)</span>}</label>
-          <input id="price" name="price" type="number" step="0.01" min="0" className="input" defaultValue={item?.price || ""} placeholder="0.00" />
         </div>
       </div>
       <FormMessage state={state?.error ? state : undefined} />
